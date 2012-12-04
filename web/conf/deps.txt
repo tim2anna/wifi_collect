@@ -1,0 +1,9 @@
+Flask
+SQLAlchemy
+Flask-SQLAlchemy
+simplejson
+celery
+pytz
+cx_Oracle
+uwsgi
+supervisor
