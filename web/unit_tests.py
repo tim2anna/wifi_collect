@@ -78,7 +78,7 @@ class CollectTestCase(unittest.TestCase):
         attr_dict["ssid_mac"] = mac_dict.get(random.randint(1,5))
         attr_dict["sta_ip"] = ip_dict.get(random.randint(1,5))
         attr_dict["sta_down_rssi"] = random.randint(1000,10000)
-        attr_dict["dhch_req_status"] = random.randint(0,1)
+        attr_dict["dhcp_req_status"] = random.randint(0,1)
         attr_dict["encrypt"] = encrypt_dict.get(random.randint(1,3))
         attr_dict["work_model"] = 'Infrastructure'
         attr_dict["radio_model"] = radio_model_dict.get(random.randint(1,3))

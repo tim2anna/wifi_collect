@@ -29,7 +29,7 @@ class AssocTest(db.Model):
     wireless_auth_model = db.Column(db.String(50))      # 无线鉴权模式
     dhcp_req_start_time = db.Column(db.TIMESTAMP)       # DHCP请求开始时间
     dhcp_req_succ_time  = db.Column(db.TIMESTAMP)       # DHCP获取成功时间
-    dhch_req_status     = db.Column(db.Integer)         # DHCP获取状态
+    dhcp_req_status     = db.Column(db.Integer)         # DHCP获取状态
     sta_ip              = db.Column(db.String(50))      # 终端IP地址
 
 
