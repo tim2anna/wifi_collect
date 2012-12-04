@@ -49,7 +49,7 @@ class CollectTestCase(unittest.TestCase):
         name = "env_test"
         attr_dict = {}
         attr_dict["sampledate"] = time.time()
-        attr_dict["samplehour"] = datetime.now().month
+        attr_dict["samplehour"] = datetime.now().hour
         attr_dict["sta_mac"] = sta_mac
         attr_dict["sampletime"] = time.time()
         attr_dict["ssid"] = "test_ssid_"+str(random.randint(100,200))
@@ -67,7 +67,7 @@ class CollectTestCase(unittest.TestCase):
         name = "assoc_test"
         attr_dict = {}
         attr_dict["sampledate"] = time.time()
-        attr_dict["samplehour"] = datetime.now().month
+        attr_dict["samplehour"] = datetime.now().hour
         attr_dict["sta_mac"] = sta_mac
         attr_dict["assoc_req_start_time"] = time.time()
         attr_dict["dhcp_req_start_time"] = time.time()
@@ -92,7 +92,7 @@ class CollectTestCase(unittest.TestCase):
         name = "auth_test"
         attr_dict = {}
         attr_dict["sampledate"] = time.time()
-        attr_dict["samplehour"] = datetime.now().month
+        attr_dict["samplehour"] = datetime.now().hour
         attr_dict["sta_mac"] = sta_mac
         attr_dict["auth_req_time"] = time.time()
         attr_dict["login"] = "test_login_"+str(random.randint(100,200))
@@ -104,7 +104,7 @@ class CollectTestCase(unittest.TestCase):
         name = "ftp_test"
         attr_dict = {}
         attr_dict["sampledate"] = time.time()
-        attr_dict["samplehour"] = datetime.now().month
+        attr_dict["samplehour"] = datetime.now().hour
         attr_dict["sta_mac"] = sta_mac
         attr_dict["up_down_url"] = "http://test.com/?trest_true"
         attr_dict["model"] = random.randint(1,2)
@@ -117,7 +117,7 @@ class CollectTestCase(unittest.TestCase):
         name = "http_test"
         attr_dict = {}
         attr_dict["sampledate"] = time.time()
-        attr_dict["samplehour"] = datetime.now().month
+        attr_dict["samplehour"] = datetime.now().hour
         attr_dict["sta_mac"] = sta_mac
         attr_dict["http_req_start_time"] = time.time()
         attr_dict["http_url"] = "http://test.com/?trest_true"
@@ -129,7 +129,7 @@ class CollectTestCase(unittest.TestCase):
         name = "ping_test"
         attr_dict = {}
         attr_dict["sampledate"] = time.time()
-        attr_dict["samplehour"] = datetime.now().month
+        attr_dict["samplehour"] = datetime.now().hour
         attr_dict["sta_mac"] = sta_mac
         attr_dict["ping_url"] = "http://test.com/?trest_true"
         attr_dict["ping_count"] = random.randint(1,200)
@@ -143,7 +143,7 @@ class CollectTestCase(unittest.TestCase):
         name = "roam_test"
         attr_dict = {}
         attr_dict["sampledate"] = time.time()
-        attr_dict["samplehour"] = datetime.now().month
+        attr_dict["samplehour"] = datetime.now().hour
         attr_dict["sta_mac"] = sta_mac
         attr_dict["roam_reassoc_req_time"] = time.time()
         attr_dict["roam_req_ap"] = "test_ap_"+str(random.randint(100,200))
