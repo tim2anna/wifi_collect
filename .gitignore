@@ -3,5 +3,5 @@
 .idea/*
 */.idea
 web/celerybeat-schedule
-web/file/*
+web/file/*.txt
 web/conf/celery.db
