@@ -1,0 +1,13 @@
+uwsgi: 
+  pythonpath   : /usr/local/lib/python2.7/dist-packages/
+  pythonpath   : /opt/wifi_collect_env/wifi_collect/web/
+  virtualenv   : /opt/wifi_collect_env/
+  socket       : /tmp/wifi_collect.sock
+  chmod-socket : 666
+  callable     : app
+  master       : true
+  module       : webapp
+  workers      : 8
+  threads      : 10
+  idle         : 1800
+  logto        : /opt/wifi_collect_env/wifi_collect.log

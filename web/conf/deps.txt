@@ -5,5 +5,6 @@ simplejson
 celery
 pytz
 cx_Oracle
+pysqlite
 uwsgi
 supervisor
