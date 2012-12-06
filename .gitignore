@@ -4,4 +4,5 @@
 */.idea
 web/celerybeat-schedule
 web/file/*.txt
+web/file/*.ctl
 web/conf/celery.db

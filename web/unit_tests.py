@@ -174,7 +174,7 @@ class CollectTestCase(unittest.TestCase):
         attr_dict["samplehour"] = datetime.now().month
         self.collect(name, attr_dict)
 
-    def test_total(self):
+    def total(self):
         for i in range(0,100):
             sta_mac = mac_dict.get(random.randint(1,5))
             self.sta_info(sta_mac)
@@ -185,6 +185,10 @@ class CollectTestCase(unittest.TestCase):
             self.auth_test(sta_mac)
             self.env_test(sta_mac)
             self.assoc_test(sta_mac)
+
+    def test_load_files(self):
+        from webapp import load_files
+        load_files()
 
 
 if __name__ == '__main__':

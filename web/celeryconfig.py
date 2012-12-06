@@ -17,7 +17,7 @@ CELERY_RESULT_DBURI = u"sqlite:///conf//celery.db"
 from datetime import timedelta
 CELERYBEAT_SCHEDULE = {
     'runs-every-1-hour': {
-        'task': 'webapp.read_files',
+        'task': 'webapp.load_files',
         'schedule': timedelta(hours=1)   #minutes=15
     },
 }
