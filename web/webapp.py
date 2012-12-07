@@ -27,15 +27,16 @@ view_config = {
     'sta_info': (u'终端信息', StaInfo),
 }
 
-procedure_config = {
-    'env_test': 1,
-    'assoc_test': 2,
-    'roam_test': 3,
-    'auth_test': 4,
-    'ping_test': 5,
-    'ftp_test': 6,
-    'http_test': 7,
-}
+procedure_config = [
+    ('sta_info', 8),
+    ('env_test', 1),
+    ('assoc_test', 2),
+    ('roam_test', 3),
+    ('auth_test', 4),
+    ('ping_test', 5),
+    ('ftp_test', 6),
+    ('http_test', 7),
+]
 
 @app.route('/collect/<name>/', methods=['GET', 'POST'])
 def collect(name):
@@ -69,10 +70,9 @@ def load_files():
             #执行sqlldr user_name/password@tnsname control=控制文件名
             sqlldr_cmd = "sqlldr %s/%s%s control=%s log=log/%s.log" % (oracle_username,oracle_pwd, oracle_tnsname,ctl_file,name)
             os.system(sqlldr_cmd)
-            p_type = procedure_config.get(name)
-            if p_type:
-                param_values = [date.today(), str(now.hour), p_type,]
-                call_procedure("wlan_deal_perception_task",param_values)
+    for name, p_type in procedure_config:
+        param_values = [date.today(), str(now.hour), p_type,]
+        call_procedure("wlan_deal_perception_task",param_values)
     return "success"
 
 def call_procedure(procedure_name, param_values):
