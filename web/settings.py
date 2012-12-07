@@ -6,10 +6,9 @@ SECRET_KEY = 'public'
 SESSION_COOKIE_NAME = 'wifi_collect'
 
 oracle_username = "opti"
-
 oracle_pwd = "opti"
-
 oracle_tnsname = "@ORCL_192.168.100.71" #oracle\ora92\network\admin\tnsnames.ora
+oracle_dsn = "192.168.100.71:1521/orcl"
 
 SQLALCHEMY_DATABASE_URI = 'oracle+cx_oracle://opti:opti@192.168.100.71:1521/orcl'
 

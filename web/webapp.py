@@ -27,6 +27,16 @@ view_config = {
     'sta_info': (u'终端信息', StaInfo),
 }
 
+procedure_config = {
+    'env_test': 1,
+    'assoc_test': 2,
+    'roam_test': 3,
+    'auth_test': 4,
+    'ping_test': 5,
+    'ftp_test': 6,
+    'http_test': 7,
+}
+
 @app.route('/collect/<name>/', methods=['GET', 'POST'])
 def collect(name):
     if name not in view_config: return "fail"
@@ -57,10 +67,25 @@ def load_files():
         ctl_file = create_ctl_file(name)
         if ctl_file:
             #执行sqlldr user_name/password@tnsname control=控制文件名
-            sqlldr_cmd = "sqlldr %s/%s%s control=%s" % (oracle_username,oracle_pwd, oracle_tnsname,ctl_file)
+            sqlldr_cmd = "sqlldr %s/%s%s control=%s log=log/%s.log" % (oracle_username,oracle_pwd, oracle_tnsname,ctl_file,name)
             os.system(sqlldr_cmd)
-            # 调用存储
+            p_type = procedure_config.get(name)
+            if p_type:
+                param_values = [date.today(), str(now.hour), p_type,]
+                call_procedure("wlan_deal_perception_task",param_values)
     return "success"
+
+def call_procedure(procedure_name, param_values):
+    import cx_Oracle
+    from settings import oracle_dsn, oracle_username, oracle_pwd
+    conn = cx_Oracle.connect(oracle_username, oracle_pwd, oracle_dsn)
+    cursor = conn.cursor()
+    oracle_cursor = cursor.var(cx_Oracle.NUMBER)
+    param_values.append(oracle_cursor)
+    res = cursor.callproc(procedure_name, param_values)
+    cursor.close()
+    conn.close()
+    return res[-1]
 
 def create_ctl_file(name):
     now = datetime.now() - timedelta(hours=1)
