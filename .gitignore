@@ -1,6 +1,7 @@
 *.pyc
 .idea
 .idea/*
+*.log
 */.idea
 web/celerybeat-schedule
 web/file/*.txt
