@@ -148,5 +148,6 @@ class StaInfo(db.Model):
     regdate        = db.Column(db.DateTime)         # 注册时间
     report_time    = db.Column(db.DateTime)         # 上报时间
     sta_status     = db.Column(db.String(50))        # 终端M状态
-    sampledate            = db.Column(db.Date, default=date.today())
-    samplehour            = db.Column(db.Integer, default=datetime.now().hour)
+    sampledate     = db.Column(db.Date, default=date.today())
+    samplehour     = db.Column(db.Integer, default=datetime.now().hour)
+    ssid_mac       = db.Column(db.String(100))    # SSID MAC
