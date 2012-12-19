@@ -18,6 +18,6 @@ from datetime import timedelta
 CELERYBEAT_SCHEDULE = {
     'runs-every-1-hour': {
         'task': 'webapp.load_files',
-        'schedule': timedelta(hours=1)   #minutes=15
+        'schedule': timedelta(seconds=10)   #minutes=15
     },
 }

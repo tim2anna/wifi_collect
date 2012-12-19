@@ -38,19 +38,43 @@ procedure_config = [
     ('http_test', 7),
 ]
 
+def get_default(default):
+    if callable(default.arg):
+        return default.arg(0)
+    else:
+        return default.arg
+
 @app.route('/collect/<name>/', methods=['GET', 'POST'])
 def collect(name):
     if name not in view_config: return "fail"
-    attr_dict = json.loads(json.dumps(request.form))
-    if name in ["assoc_test","env_test","auth_test","ftp_test","http_test","ping_test","roam_test","sta_info"]:  # 数据保存文件
+    if name in ["assoc_test","env_test","auth_test","ftp_test","http_test","ping_test","roam_test","sta_info"]:
         now = datetime.now()
         filename = name+now.strftime('-%Y-%m-%d-%H') + '.txt'
         with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "file", filename), 'a') as file:
             name_cn, model = view_config.get(name)
-            record = [attr_dict.get(column.name,str(column.default.arg) if column.default else '') for column in model.__table__.columns]
-            file.write('|'.join(record) + '\n')
+            data = request.form.get(name)
+            if data:
+                data_list = json.loads(data)
+                for attr_dict in data_list:
+                    record = []
+                    for column in model.__table__.columns:
+                        value = attr_dict.get(column.name,str(get_default(column.default)) if column.default else '')
+                        if column.name in ['sta_mac','ssid_mac','ssid','assoc_req_ssid']:
+                            value = value.upper()
+                        record.append(value)
+                    file.write('|'.join(record) + '\n')
+            else:
+                attr_dict = json.loads(json.dumps(request.form))
+                record = []
+                for column in model.__table__.columns:
+                    value = attr_dict.get(column.name,str(get_default(column.default)) if column.default else '')
+                    if column.name in ['sta_mac','ssid_mac','ssid','assoc_req_ssid']:
+                        value = value.upper()
+                    record.append(value)
+                file.write('|'.join(record) + '\n')
         return "success"
     else:   # 其它直接存数据库
+        attr_dict = json.loads(json.dumps(request.form))
         name_cn, model = view_config[name]
         obj = model()
         obj = load_obj(obj, attr_dict)
@@ -93,13 +117,15 @@ def create_ctl_file(name):
     data_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "file", filename)
     if not os.path.exists(data_file): return
     name_cn, model = view_config.get(name)
-    columns = [(d.name,d.type.python_type) for d in model.__table__.columns]
+    columns = [(d.name,d.type) for d in model.__table__.columns]
     fields = []
     for col_name, col_type in columns:
         field = col_name
-        if col_type is datetime:
+        if isinstance(col_type, db.TIMESTAMP):
+            field += " timestamp 'yyyy-mm-dd HH24:mi:ss:ff6'"
+        elif isinstance(col_type, db.DateTime):
             field += " Date 'yyyy-mm-dd HH24:mi:ss'"
-        elif col_type is date:
+        elif isinstance(col_type, db.Date):
             field += " Date 'yyyy-mm-dd'"
         fields.append(field)
 
@@ -130,5 +156,5 @@ def load_obj(obj, attr_dict):
     return obj
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=8001, debug=True)
+    app.run(host='0.0.0.0', debug=True, port=8080)
 
