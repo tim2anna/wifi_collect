@@ -44,6 +44,24 @@ def get_default(default):
     else:
         return default.arg
 
+def get_delay(attr_dict):
+    try:
+        format_str = '%Y-%m-%d %H:%M:%S:%f'
+        assocsucc_time = attr_dict.get('assocsucc_time')
+        assoc_req_start_time = attr_dict.get('assoc_req_start_time')
+        if assocsucc_time and assoc_req_start_time:
+            assoc_delay = datetime.strptime(assocsucc_time,format_str) - datetime.strptime(assoc_req_start_time,format_str)
+            attr_dict['assoc_delay'] = str(int(1000000*assoc_delay.total_seconds()))
+
+        dhcp_req_succ_time = attr_dict.get('dhcp_req_succ_time')
+        dhcp_req_start_time = attr_dict.get('dhcp_req_start_time')
+        if dhcp_req_succ_time and dhcp_req_start_time:
+            dhcp_delay = datetime.strptime(dhcp_req_succ_time,format_str) - datetime.strptime(dhcp_req_start_time,format_str)
+            attr_dict['dhcp_delay'] = str(int(1000000*dhcp_delay.total_seconds()))
+    except :
+        pass
+    return attr_dict
+
 @app.route('/collect/<name>/', methods=['GET', 'POST'])
 def collect(name):
     if name not in view_config: return "fail"
@@ -55,6 +73,7 @@ def collect(name):
         if data:
             data_list = json.loads(data)
             for attr_dict in data_list:
+                if name == "assoc_test": attr_dict = get_delay(attr_dict)     # 关联测试处理时延
                 record = []
                 for column in model.__table__.columns:
                     value = attr_dict.get(column.name,str(get_default(column.default)) if column.default else '')
@@ -64,6 +83,7 @@ def collect(name):
                 file.write('|'.join(record) + '\n')
         else:
             attr_dict = json.loads(json.dumps(request.form))
+            if name == "assoc_test": attr_dict = get_delay(attr_dict)     # 关联测试处理时延
             record = []
             for column in model.__table__.columns:
                 value = attr_dict.get(column.name,str(get_default(column.default)) if column.default else '')
