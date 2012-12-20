@@ -47,40 +47,31 @@ def get_default(default):
 @app.route('/collect/<name>/', methods=['GET', 'POST'])
 def collect(name):
     if name not in view_config: return "fail"
-    if name in ["assoc_test","env_test","auth_test","ftp_test","http_test","ping_test","roam_test","sta_info"]:
-        now = datetime.now()
-        filename = name+now.strftime('-%Y-%m-%d-%H') + '.txt'
-        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "file", filename), 'a') as file:
-            name_cn, model = view_config.get(name)
-            data = request.form.get(name)
-            if data:
-                data_list = json.loads(data)
-                for attr_dict in data_list:
-                    record = []
-                    for column in model.__table__.columns:
-                        value = attr_dict.get(column.name,str(get_default(column.default)) if column.default else '')
-                        if column.name in ['sta_mac','ssid_mac','ssid','assoc_req_ssid']:
-                            value = value.upper()
-                        record.append(value)
-                    file.write('|'.join(record) + '\n')
-            else:
-                attr_dict = json.loads(json.dumps(request.form))
+    now = datetime.now()
+    filename = name+now.strftime('-%Y-%m-%d-%H') + '.txt'
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "file", filename), 'a') as file:
+        name_cn, model = view_config.get(name)
+        data = request.form.get(name)
+        if data:
+            data_list = json.loads(data)
+            for attr_dict in data_list:
                 record = []
                 for column in model.__table__.columns:
                     value = attr_dict.get(column.name,str(get_default(column.default)) if column.default else '')
-                    if column.name in ['sta_mac','ssid_mac','ssid','assoc_req_ssid']:
+                    if column.name in ['sta_mac','ssid_mac']:
                         value = value.upper()
                     record.append(value)
                 file.write('|'.join(record) + '\n')
-        return "success"
-    else:   # 其它直接存数据库
-        attr_dict = json.loads(json.dumps(request.form))
-        name_cn, model = view_config[name]
-        obj = model()
-        obj = load_obj(obj, attr_dict)
-        db.session.add(obj)
-        db.session.commit()
-        return "success"
+        else:
+            attr_dict = json.loads(json.dumps(request.form))
+            record = []
+            for column in model.__table__.columns:
+                value = attr_dict.get(column.name,str(get_default(column.default)) if column.default else '')
+                if column.name in ['sta_mac','ssid_mac']:
+                    value = value.upper()
+                record.append(value)
+            file.write('|'.join(record) + '\n')
+    return "success"
 
 from celery.task import task
 
@@ -88,15 +79,18 @@ from celery.task import task
 def load_files():
     now = datetime.now() - timedelta(hours=1)
     from settings import oracle_username,oracle_pwd,oracle_tnsname
+    procedure_name = []
     for name in view_config.keys():
         ctl_file = create_ctl_file(name)
         if ctl_file:
             #执行sqlldr user_name/password@tnsname control=控制文件名
-            sqlldr_cmd = "sqlldr %s/%s%s control=%s log=log/%s.log" % (oracle_username,oracle_pwd, oracle_tnsname,ctl_file,name)
+            sqlldr_cmd = "sqlldr %s/%s%s control=%s log=log/%s.log" % (oracle_username,oracle_pwd, oracle_tnsname,ctl_file[0],name)
             os.system(sqlldr_cmd)
+            os.system("mv %s %s.old" % (ctl_file[1],ctl_file[1]))
+            procedure_name.append(name)
     for name, p_type in procedure_config:
         param_values = [date.today(), str(now.hour), p_type,]
-        call_procedure("wlan_deal_perception_task",param_values)
+        if name in procedure_name: call_procedure("wlan_deal_perception_task",param_values)
     return "success"
 
 def call_procedure(procedure_name, param_values):
@@ -144,16 +138,7 @@ def create_ctl_file(name):
     ctl_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "file", name+".ctl")
     with open(ctl_file,'wb') as f:
         f.write(ctl_content)
-    return ctl_file
-
-# 将attr_dict加载到obj的属性中
-def load_obj(obj, attr_dict):
-    for attr_name, attr_value in attr_dict.items():
-        if 'time' in attr_name or 'date' in attr_name:
-            attr_value = datetime.utcfromtimestamp(float(attr_value))
-        if hasattr(obj,attr_name):
-            setattr(obj, attr_name, attr_value)
-    return obj
+    return ctl_file,data_file
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True, port=8080)
