@@ -44,20 +44,44 @@ def get_default(default):
     else:
         return default.arg
 
-def get_delay(attr_dict):
+time_fileds = {
+    "assoc_test": [
+        ('assocsucc_time','assoc_req_start_time','assoc_delay'),
+        ('dhcp_req_succ_time','dhcp_req_start_time','dhcp_delay'),
+    ],
+    "auth_test": [
+        ('portal_succ_time','portal_req_time','portal_delay'),
+        ('auth_succ_time','auth_req_time','auth_delay'),
+    ],
+    "http_test": [
+        ('http_req_end_time','http_req_start_time','http_delay'),
+    ],
+}
+
+# 处理时延
+def get_delay(attr_dict, time_fileds):
     try:
         format_str = '%Y-%m-%d %H:%M:%S:%f'
-        assocsucc_time = attr_dict.get('assocsucc_time')
-        assoc_req_start_time = attr_dict.get('assoc_req_start_time')
-        if assocsucc_time and assoc_req_start_time:
-            assoc_delay = datetime.strptime(assocsucc_time,format_str) - datetime.strptime(assoc_req_start_time,format_str)
-            attr_dict['assoc_delay'] = str(int(1000000*assoc_delay.total_seconds()))
-
-        dhcp_req_succ_time = attr_dict.get('dhcp_req_succ_time')
-        dhcp_req_start_time = attr_dict.get('dhcp_req_start_time')
-        if dhcp_req_succ_time and dhcp_req_start_time:
-            dhcp_delay = datetime.strptime(dhcp_req_succ_time,format_str) - datetime.strptime(dhcp_req_start_time,format_str)
-            attr_dict['dhcp_delay'] = str(int(1000000*dhcp_delay.total_seconds()))
+        for succ_time_field, start_time_field, delay_field in time_fileds:
+            succ_time = attr_dict.get(succ_time_field)
+            start_time = attr_dict.get(start_time_field)
+            if succ_time and not start_time:
+                attr_dict[delay_field] = '0'
+                attr_dict[start_time_field] = succ_time
+            elif not succ_time and start_time:
+                attr_dict[delay_field] = '0'
+                attr_dict[succ_time_field] = start_time
+            elif succ_time and start_time:
+                start_time = datetime.strptime(start_time,format_str)
+                succ_time = datetime.strptime(succ_time,format_str)
+                if start_time > succ_time:   #处理成功时间小于开始时间的清空
+                    attr_dict[delay_field] = '0'
+                    attr_dict[start_time_field] = attr_dict[succ_time_field]
+                else:
+                    delay = succ_time - start_time
+                    attr_dict[delay_field] = str(int(1000*delay.total_seconds()))
+            else:
+                return
     except :
         pass
     return attr_dict
@@ -73,21 +97,25 @@ def collect(name):
         if data:
             data_list = json.loads(data)
             for attr_dict in data_list:
-                if name == "assoc_test": attr_dict = get_delay(attr_dict)     # 关联测试处理时延
+                if name in ["assoc_test","auth_test", "http_test"]:
+                    attr_dict = get_delay(attr_dict,time_fileds[name])     # 处理时延
+                    if not attr_dict: return "fail"
                 record = []
                 for column in model.__table__.columns:
                     value = attr_dict.get(column.name,str(get_default(column.default)) if column.default else '')
-                    if column.name in ['sta_mac','ssid_mac']:
+                    if column.name in ['sta_mac','ssid_mac','current_ssid_mac']:
                         value = value.upper()
                     record.append(value)
                 file.write('|'.join(record) + '\n')
         else:
             attr_dict = json.loads(json.dumps(request.form))
-            if name == "assoc_test": attr_dict = get_delay(attr_dict)     # 关联测试处理时延
+            if name in ["assoc_test","auth_test","http_test"]:
+                attr_dict = get_delay(attr_dict,time_fileds[name])     # 处理时延
+                if not attr_dict: return "fail"
             record = []
             for column in model.__table__.columns:
                 value = attr_dict.get(column.name,str(get_default(column.default)) if column.default else '')
-                if column.name in ['sta_mac','ssid_mac']:
+                if column.name in ['sta_mac','ssid_mac','current_ssid_mac']:
                     value = value.upper()
                 record.append(value)
             file.write('|'.join(record) + '\n')
@@ -110,7 +138,7 @@ def load_files():
             procedure_name.append(name)
     for name, p_type in procedure_config:
         param_values = [date.today(), str(now.hour), p_type,]
-        if name in procedure_name: call_procedure("wlan_deal_perception_task",param_values)
+        if name in procedure_name or name=='sta_info': call_procedure("wlan_deal_perception_task",param_values)
     return "success"
 
 def call_procedure(procedure_name, param_values):

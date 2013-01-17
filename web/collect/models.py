@@ -41,14 +41,24 @@ class AuthTest(db.Model):
         认证测试
     '''
     __tablename__ = 'wlan_perception_auth_test'
-    sampledate     = db.Column(db.Date, default=lambda: date.today().strftime('%Y-%m-%d'))
-    samplehour     = db.Column(db.Integer, default=lambda: datetime.now().hour)
-    sta_mac               = db.Column(db.String(50), primary_key=True)
-    login           = db.Column(db.String(100))      # 账号
-    auth_req_time   = db.Column(db.TIMESTAMP)      # 认证请求时间
+    sampledate      = db.Column(db.Date, default=lambda: date.today().strftime('%Y-%m-%d'))
+    samplehour      = db.Column(db.Integer, default=lambda: datetime.now().hour)
+    sta_mac         = db.Column(db.String(50), primary_key=True)
+    login           = db.Column(db.String(100))     # 账号
+    ssid            = db.Column(db.String(50))      # SSID
+    ssid_mac        = db.Column(db.String(50))      # SSID_MAC
+    portal_req_time = db.Column(db.TIMESTAMP)       # 请求开始时间
+    portal_succ_time= db.Column(db.TIMESTAMP)       # 请求成功时间
+    portal_delay    = db.Column(db.Integer)         # 请求时延
+    auth_req_time   = db.Column(db.TIMESTAMP)       # 认证请求时间
     auth_succ_time  = db.Column(db.TIMESTAMP)       # 认证成功时间
+    auth_delay      = db.Column(db.Integer)         # 认证时延
     auth_status     = db.Column(db.Integer)         # 认证状态
-
+    sta_down_rssi   = db.Column(db.Integer)         # 下行信号强度
+    ap_txrates      = db.Column(db.Integer)         # 协商速率
+    frequency       = db.Column(db.Integer)         # 频率
+    sta_ip          = db.Column(db.String(50))      # 终端IP地址
+    channel         = db.Column(db.String(20))      # 信道
 
 class EnvTest(db.Model):
     '''
@@ -58,8 +68,9 @@ class EnvTest(db.Model):
     sampledate     = db.Column(db.Date, default=lambda: date.today().strftime('%Y-%m-%d'))
     samplehour     = db.Column(db.Integer, default=lambda: datetime.now().hour)
     sta_mac               = db.Column(db.String(50), primary_key=True)
-    sampletime          = db.Column(db.DateTime)      # 时间
+    sampletime          = db.Column(db.TIMESTAMP)      # 时间
     ssid                = db.Column(db.String(100))    # SSID
+    current_ssid_mac    = db.Column(db.String(100))    # CURRENT_SSID_MAC
     frequency           = db.Column(db.Integer)        # 频率
     ssid_mac            = db.Column(db.String(100))    # SSID MAC
     sta_down_rssi       = db.Column(db.Integer)        # 下行信号强度
@@ -91,11 +102,21 @@ class HttpTest(db.Model):
     __tablename__ = 'wlan_perception_http_test'
     sampledate     = db.Column(db.Date, default=lambda: date.today().strftime('%Y-%m-%d'))
     samplehour     = db.Column(db.Integer, default=lambda: datetime.now().hour)
-    sta_mac               = db.Column(db.String(50), primary_key=True)
-    http_url            = db.Column(db.String(500))      # HTTP访问URL
-    http_req_start_time = db.Column(db.TIMESTAMP)      # HTTP请求开始时间
-    http_req_end_time   = db.Column(db.TIMESTAMP)       # HTTP请求完成时间
-    http_req_bytes      = db.Column(db.Integer)         # HTTP请求字节数
+    sta_mac        = db.Column(db.String(50), primary_key=True)
+    sampletime     = db.Column(db.TIMESTAMP)      # 时间
+    ssid           = db.Column(db.String(50))      # SSID
+    ssid_mac       = db.Column(db.String(50))      # SSID_MAC
+    http_url       = db.Column(db.String(500))      # HTTP访问URL
+    http_status    = db.Column(db.Integer)         # http测试状态
+    http_req_start_time = db.Column(db.TIMESTAMP)  # HTTP请求开始时间
+    http_req_end_time   = db.Column(db.TIMESTAMP)  # HTTP请求完成时间
+    http_req_bytes      = db.Column(db.Integer)    # HTTP请求字节数
+    http_delay     = db.Column(db.Integer)         # http时延
+    sta_down_rssi       = db.Column(db.Integer)        # 下行信号强度
+    frequency           = db.Column(db.Integer)        # 频率
+    encrypt             = db.Column(db.String(50))     # 加密方式
+    work_model          = db.Column(db.String(50))     # 工作模式
+    radio_model         = db.Column(db.String(50))     # 射频模式
 
 
 class PingTest(db.Model):
@@ -105,13 +126,24 @@ class PingTest(db.Model):
     __tablename__ = 'wlan_perception_ping_test'
     sampledate     = db.Column(db.Date, default=lambda: date.today().strftime('%Y-%m-%d'))
     samplehour     = db.Column(db.Integer, default=lambda: datetime.now().hour)
-    sta_mac               = db.Column(db.String(50), primary_key=True)
-    ping_url        = db.Column(db.String(500))      # PING访问URL
-    ping_count      = db.Column(db.Integer)       # PING请求次数
-    pingok_count    = db.Column(db.Integer)       # PING成功次数
-    ping_delay_avg  = db.Column(db.Integer)       # PING平均时延
-    ping_delay_min  = db.Column(db.Integer)       # PING最小时延
-    ping_delay_max  = db.Column(db.Integer)       # PING最大时延
+    sta_mac        = db.Column(db.String(50), primary_key=True)
+    sampletime     = db.Column(db.TIMESTAMP)      # 时间
+    ssid           = db.Column(db.String(50))      # SSID
+    ssid_mac       = db.Column(db.String(50))      # SSID_MAC
+    ping_url       = db.Column(db.String(500))      # PING访问URL
+    ping_status    = db.Column(db.Integer)         # ping测试状态
+    pingall_count  = db.Column(db.Integer)       # PING请求次数
+    pingok_count   = db.Column(db.Integer)       # PING成功次数
+    ping_delay     = db.Column(db.Integer)       # ping时延
+    ping_delay_avg = db.Column(db.Integer)       # PING平均时延
+    ping_delay_min = db.Column(db.Integer)       # PING最小时延
+    ping_delay_max = db.Column(db.Integer)       # PING最大时延
+    ping_package   = db.Column(db.Integer)       # ping包大小
+    sta_down_rssi  = db.Column(db.Integer)        # 下行信号强度
+    frequency      = db.Column(db.Integer)        # 频率
+    encrypt        = db.Column(db.String(50))     # 加密方式
+    work_model     = db.Column(db.String(50))     # 工作模式
+    radio_model    = db.Column(db.String(50))     # 射频模式
 
 
 class RoamTest(db.Model):
