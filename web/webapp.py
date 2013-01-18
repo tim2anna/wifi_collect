@@ -5,6 +5,7 @@
     功能：获取手机客户端POST的数据，处理存入数据库
 """
 import os
+import codecs
 from datetime import datetime, timedelta, date
 from flask import Flask, request, current_app
 import simplejson as json
@@ -91,7 +92,7 @@ def collect(name):
     if name not in view_config: return "fail"
     now = datetime.now()
     filename = name+now.strftime('-%Y-%m-%d-%H') + '.txt'
-    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "file", filename), 'a') as file:
+    with codecs.open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "file", filename), 'a', 'utf-8') as file:
         name_cn, model = view_config.get(name)
         data = request.form.get(name)
         if data:
@@ -102,7 +103,7 @@ def collect(name):
                     if not attr_dict: return "fail"
                 record = []
                 for column in model.__table__.columns:
-                    value = attr_dict.get(column.name,str(get_default(column.default)) if column.default else '')
+                    value = unicode(attr_dict.get(column.name,get_default(column.default) if column.default else ''))
                     if column.name in ['sta_mac','ssid_mac','current_ssid_mac']:
                         value = value.upper()
                     record.append(value)
@@ -114,7 +115,7 @@ def collect(name):
                 if not attr_dict: return "fail"
             record = []
             for column in model.__table__.columns:
-                value = attr_dict.get(column.name,str(get_default(column.default)) if column.default else '')
+                value = unicode(attr_dict.get(column.name,get_default(column.default) if column.default else ''))
                 if column.name in ['sta_mac','ssid_mac','current_ssid_mac']:
                     value = value.upper()
                 record.append(value)

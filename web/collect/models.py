@@ -144,6 +144,7 @@ class PingTest(db.Model):
     encrypt        = db.Column(db.String(50))     # 加密方式
     work_model     = db.Column(db.String(50))     # 工作模式
     radio_model    = db.Column(db.String(50))     # 射频模式
+    ping_pk_lost   = db.Column(db.Float)     # 丢包率
 
 
 class RoamTest(db.Model):
